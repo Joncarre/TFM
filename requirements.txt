@@ -1,6 +1,6 @@
 # Captura de paquetes
 scapy==2.5.0
-pyshark==0.6
+pyshark==0.6.0
 
 # Procesamiento de datos
 pandas==2.1.0

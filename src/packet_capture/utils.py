@@ -35,14 +35,20 @@ def get_available_interfaces():
     """Obtiene una lista de interfaces de red disponibles."""
     if platform.system() == "Windows":
         # En Windows, usar tshark para listar interfaces
-        tshark_path = os.getenv("TSHARK_PATH", "tshark")
         try:
+            tshark_path = os.getenv("TSHARK_PATH", "tshark")
+            print(f"DEBUG: Intentando ejecutar TShark desde: {tshark_path}")
+            
             result = subprocess.run(
                 [tshark_path, "-D"], 
                 capture_output=True, 
                 text=True, 
-                check=True
+                check=False  # Cambiado a False para no lanzar excepciones
             )
+            
+            print(f"DEBUG: Resultado comando: {result.stdout}")
+            print(f"DEBUG: Error comando: {result.stderr}")
+            
             interfaces = []
             for line in result.stdout.splitlines():
                 if line.strip():
