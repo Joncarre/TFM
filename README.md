@@ -1,4 +1,3 @@
-
 ## 🔍 Network Analyzer
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://www.python.org/)
@@ -8,7 +7,7 @@
 **Network Analyzer** es una aplicación web que democratiza el análisis de seguridad en red. Combina captura avanzada de paquetes con inteligencia artificial para permitir que usuarios sin experiencia técnica profunda puedan monitorizar la seguridad de su red mediante consultas en lenguaje natural.
 
 ### 🎯 Objetivos
-- Capturar y analizar tráfico de red en tiempo real
+- Capturar y analizar tráfico de red en tiempo real (capas de Red y Transporte)
 - Procesar datos para alimentar modelos de IA
 - Permitir consultas en lenguaje natural sobre eventos de seguridad
 - Visualizar información de manera clara e intuitiva
