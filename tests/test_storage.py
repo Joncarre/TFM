@@ -3,6 +3,9 @@
 
 import sys
 import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from src.data_processing.packet_processor import PacketProcessor
 from src.data_processing.storage_manager import StorageManager
 

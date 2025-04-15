@@ -1,7 +1,12 @@
+# Este script es un ejemplo de cómo utilizar el analizador de paquetes avanzado para analizar sesiones de red, detectar anomalías, escaneos de puertos y patrones de comunicación.
+
 import os
 import sqlite3
 import json
 import datetime
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from src.data_processing.storage_manager import StorageManager
 from tabulate import tabulate  # Si no está instalado: pip install tabulate
 from colorama import init, Fore, Style  # Si no está instalado: pip install colorama

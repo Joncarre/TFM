@@ -29,10 +29,19 @@ class StorageManager:
             db_file: Ruta al archivo de base de datos SQLite
             retention_days: Número de días que se deben conservar los datos
         """
-        self.db_file = db_file
+        # Crear directorio databases si no existe
+        database_dir = "databases"
+        os.makedirs(database_dir, exist_ok=True)
+        
+        # Si db_file no incluye un separador de ruta, añadir databases/
+        if os.path.sep not in db_file:
+            self.db_file = os.path.join(database_dir, db_file)
+        else:
+            self.db_file = db_file
+            
         self.retention_days = retention_days
         self._init_database()
-        logger.info(f"StorageManager inicializado con base de datos: {db_file}")
+        logger.info(f"StorageManager inicializado con base de datos: {self.db_file}")
     
     def _init_database(self) -> None:
         """Inicializa la estructura de la base de datos si no existe."""

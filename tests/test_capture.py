@@ -10,7 +10,7 @@ import sys
 import platform
 
 # Añadir directorio raíz al path para importar módulos
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.packet_capture.capture_manager import CaptureManager, CaptureMethod
 from src.packet_capture.utils import logger

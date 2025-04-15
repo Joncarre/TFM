@@ -2,6 +2,10 @@
 # It processes a PCAP file and prints out basic statistics about the packets, including layer 4 protocol distribution.
 
 import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from src.data_processing.packet_processor import PacketProcessor
 
 def main():

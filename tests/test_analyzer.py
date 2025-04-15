@@ -1,0 +1,135 @@
+# test_analyzer.py
+# Este script es un ejemplo de cómo utilizar el analizador de paquetes avanzado para analizar sesiones de red, detectar anomalías, escaneos de puertos y patrones de comunicación.  
+
+import os
+import argparse
+import json
+from datetime import datetime, timedelta
+import pandas as pd
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from src.packet_capture.capture_manager import CaptureManager
+from src.data_processing.packet_processor import PacketProcessor
+from src.data_processing.storage_manager import StorageManager
+from src.ai_engine.packet_analyzer import PacketAnalyzer
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Prueba del analizador de paquetes avanzado')
+    parser.add_argument('--db_path', type=str, default='captures/network_data.db',
+                        help='Ruta a la base de datos SQLite')
+    parser.add_argument('--session_id', type=str, 
+                        help='ID de sesión específica a analizar (opcional)')
+    parser.add_argument('--analyze_all', action='store_true',
+                        help='Analizar todas las sesiones disponibles')
+    parser.add_argument('--detect_anomalies', action='store_true',
+                        help='Buscar anomalías en todo el tráfico')
+    parser.add_argument('--detect_scans', action='store_true',
+                        help='Detectar escaneos de puertos')
+    parser.add_argument('--top_talkers', action='store_true',
+                        help='Identificar los hosts más activos')
+    parser.add_argument('--focus_ip', type=str,
+                        help='IP específica para analizar en detalle')
+    parser.add_argument('--output', type=str,
+                        help='Ruta para guardar los resultados en formato JSON')
+    
+    return parser.parse_args()
+
+def print_analysis_results(results, title):
+    """Imprime los resultados del análisis de forma legible"""
+    print(f"\n{'=' * 80}")
+    print(f"{title}")
+    print(f"{'=' * 80}")
+    
+    # Convertir a JSON formateado para mejor visualización
+    formatted_json = json.dumps(results, indent=2, ensure_ascii=False)
+    print(formatted_json)
+
+def main():
+    args = parse_arguments()
+    
+    # Verificar que la base de datos existe
+    if not os.path.exists(args.db_path):
+        print(f"Error: La base de datos {args.db_path} no existe.")
+        return
+    
+    # Inicializar el analizador
+    analyzer = PacketAnalyzer(args.db_path)
+    print(f"Analizador inicializado con base de datos: {args.db_path}")
+    
+    # Variable para almacenar todos los resultados
+    all_results = {}
+    
+    # Analizar una sesión específica
+    if args.session_id:
+        print(f"Analizando sesión: {args.session_id}")
+        results = analyzer.analyze_session(args.session_id)
+        print_analysis_results(results, f"Análisis de sesión: {args.session_id}")
+        all_results["session_analysis"] = results
+    
+    # Analizar todas las sesiones
+    if args.analyze_all:
+        storage = StorageManager(args.db_path)
+        sessions = storage.get_all_sessions()
+        
+        all_sessions_results = {}
+        
+        for session in sessions:
+            session_id = session["id"]
+            print(f"Analizando sesión: {session_id}")
+            results = analyzer.analyze_session(session_id)
+            all_sessions_results[session_id] = results
+        
+        print(f"Análisis completado para {len(sessions)} sesiones.")
+        all_results["all_sessions"] = all_sessions_results
+    
+    # Buscar anomalías
+    if args.detect_anomalies:
+        # Establecer ventana de tiempo (últimas 24 horas por defecto)
+        end_time = datetime.now()
+        start_time = end_time - timedelta(days=1)
+        
+        print(f"Buscando anomalías desde {start_time} hasta {end_time}")
+        anomalies = analyzer.search_anomalies(start_time=start_time.timestamp(), end_time=end_time.timestamp())
+        
+        print(f"Se encontraron {len(anomalies)} anomalías.")
+        print_analysis_results(anomalies, "Anomalías Detectadas")
+        all_results["anomalies"] = anomalies
+    
+    # Detectar escaneos de puertos
+    if args.detect_scans:
+        # Establecer ventana de tiempo (últimas 24 horas por defecto)
+        end_time = datetime.now()
+        start_time = end_time - timedelta(days=1)
+        
+        print(f"Detectando escaneos de puertos desde {start_time} hasta {end_time}")
+        scans = analyzer.detect_port_scans(timeframe=(start_time.timestamp(), end_time.timestamp()))
+        
+        print(f"Se detectaron {len(scans)} posibles escaneos de puertos.")
+        print_analysis_results(scans, "Escaneos de Puertos Detectados")
+        all_results["port_scans"] = scans
+    
+    # Identificar los hosts más activos
+    if args.top_talkers:
+        print("Identificando hosts más activos...")
+        top_talkers = analyzer.get_top_talkers(n=10)
+        
+        print_analysis_results(top_talkers, "Hosts Más Activos")
+        all_results["top_talkers"] = top_talkers
+    
+    # Analizar una IP específica
+    if args.focus_ip:
+        print(f"Analizando patrones de comunicación para IP: {args.focus_ip}")
+        ip_patterns = analyzer.analyze_communication_patterns(ip_address=args.focus_ip)
+        
+        print_analysis_results(ip_patterns, f"Análisis de IP: {args.focus_ip}")
+        all_results["ip_analysis"] = ip_patterns
+    
+    # Guardar resultados si se especifica una ruta de salida
+    if args.output:
+        with open(args.output, 'w', encoding='utf-8') as f:
+            json.dump(all_results, f, ensure_ascii=False, indent=2)
+        print(f"Resultados guardados en: {args.output}")
+
+if __name__ == "__main__":
+    main()
