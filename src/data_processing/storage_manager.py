@@ -791,6 +791,71 @@ class StorageManager:
             return data.get(path)
         except:
             return None
+        
+    def get_all_sessions(self):
+        """
+        Obtiene todas las sesiones de captura disponibles en la base de datos.
+        
+        Returns:
+            List[Dict]: Lista de diccionarios con información de las sesiones
+        """
+        try:
+            conn = sqlite3.connect(self.db_file)
+            conn.row_factory = sqlite3.Row  # Para obtener resultados como diccionarios
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+            SELECT id, capture_file, start_time, end_time, packet_count, description
+            FROM captures
+            ORDER BY start_time DESC
+            ''')
+            
+            sessions = [dict(row) for row in cursor.fetchall()]
+            conn.close()
+            
+            return sessions
+            
+        except sqlite3.Error as e:
+            logger.error(f"Error al obtener sesiones de captura: {e}")
+            if conn:
+                conn.close()
+            return []
+    def get_session_metadata(self, session_id):
+        """
+        Obtiene los metadatos de una sesión de captura específica.
+        
+        Args:
+            session_id (int): ID de la sesión
+            
+        Returns:
+            dict: Metadatos de la sesión o None si no se encuentra
+        """
+        try:
+            conn = sqlite3.connect(self.db_file)
+            conn.row_factory = sqlite3.Row  # Para obtener resultados como diccionarios
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+            SELECT id, capture_file, start_time, end_time, packet_count, description
+            FROM captures
+            WHERE id = ?
+            ''', (session_id,))
+            
+            row = cursor.fetchone()
+            conn.close()
+            
+            if row:
+                metadata = dict(row)
+                return metadata
+            else:
+                logger.warning(f"No se encontró la sesión con ID: {session_id}")
+                return None
+            
+        except sqlite3.Error as e:
+            logger.error(f"Error al obtener metadatos de sesión: {e}")
+            if conn:
+                conn.close()
+            return None
     
     def cleanup_old_data(self) -> int:
         """

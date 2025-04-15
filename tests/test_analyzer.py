@@ -2,6 +2,7 @@
 # Este script es un ejemplo de cómo utilizar el analizador de paquetes avanzado para analizar sesiones de red, detectar anomalías, escaneos de puertos y patrones de comunicación.  
 
 import os
+import sys
 import argparse
 import json
 from datetime import datetime, timedelta
@@ -52,6 +53,48 @@ def main():
     if not os.path.exists(args.db_path):
         print(f"Error: La base de datos {args.db_path} no existe.")
         return
+    
+    # Generar nombre de archivo de resultados si se especificó una carpeta
+    if args.output:
+        # Verificar si se especificó un archivo de salida o solo un directorio
+        output_is_dir = args.output.endswith('/') or args.output.endswith('\\') or os.path.isdir(args.output)
+        
+        if output_is_dir:
+            # Es un directorio, generamos un nombre basado en la base de datos
+            os.makedirs(args.output, exist_ok=True)
+            
+            # Extraer patrón de fecha/hora del nombre de la base de datos
+            db_basename = os.path.basename(args.db_path)
+            
+            # Verificar si el nombre sigue el patrón database_YYYYMMDD_HHMMSS.db
+            if db_basename.startswith("database_") and db_basename.endswith(".db"):
+                timestamp_part = db_basename[9:-3]  # Extraer YYYYMMDD_HHMMSS
+                
+                # Generar nombre para el archivo JSON
+                if args.analyze_all:
+                    json_file = os.path.join(args.output, f"analysis_{timestamp_part}.json")
+                elif args.detect_anomalies:
+                    json_file = os.path.join(args.output, f"anomalies_{timestamp_part}.json")
+                elif args.detect_scans:
+                    json_file = os.path.join(args.output, f"scans_{timestamp_part}.json")
+                elif args.top_talkers:
+                    json_file = os.path.join(args.output, f"talkers_{timestamp_part}.json")
+                elif args.focus_ip:
+                    ip_part = args.focus_ip.replace('.', '_')
+                    json_file = os.path.join(args.output, f"ip_{ip_part}_{timestamp_part}.json")
+                elif args.session_id:
+                    json_file = os.path.join(args.output, f"session_{args.session_id}_{timestamp_part}.json")
+                else:
+                    # Si ninguna opción específica, usar un nombre genérico
+                    json_file = os.path.join(args.output, f"results_{timestamp_part}.json")
+            else:
+                # Si no sigue el patrón, usar timestamp actual
+                now = datetime.datetime.now()
+                timestamp = now.strftime("%Y%m%d_%H%M%S")
+                json_file = os.path.join(args.output, f"analysis_{timestamp}.json")
+            
+            # Actualizar args.output con el nombre de archivo generado
+            args.output = json_file
     
     # Inicializar el analizador
     analyzer = PacketAnalyzer(args.db_path)
@@ -127,6 +170,9 @@ def main():
     
     # Guardar resultados si se especifica una ruta de salida
     if args.output:
+        # Asegurarse de que el directorio existe
+        os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
+        
         with open(args.output, 'w', encoding='utf-8') as f:
             json.dump(all_results, f, ensure_ascii=False, indent=2)
         print(f"Resultados guardados en: {args.output}")
