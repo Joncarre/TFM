@@ -1,6 +1,4 @@
 # src/ai_engine/packet_analyzer.py
-# Este script implementa un analizador avanzado de paquetes de red
-# utilizando técnicas de inteligencia artificial y análisis de patrones.
 
 import pandas as pd
 import numpy as np
@@ -114,17 +112,17 @@ class PacketAnalyzer:
         Returns:
             pandas.DataFrame: DataFrame con los paquetes de la sesión
         """
-        # Obtener todos los paquetes de la sesión
-        query = f"""
+        # Consulta adaptada para tu esquema de base de datos
+        query = """
         SELECT p.*, 
-               tcp.flags, tcp.window_size, tcp.seq_number, tcp.ack_number,
-               udp.length,
-               icmp.type, icmp.code
-        FROM packets p
-        LEFT JOIN tcp_packets tcp ON p.id = tcp.packet_id
-        LEFT JOIN udp_packets udp ON p.id = udp.packet_id
-        LEFT JOIN icmp_packets icmp ON p.id = icmp.packet_id
-        WHERE p.session_id = ?
+           t.flags, t.window_size, t.seq_num as seq_number, t.ack_num as ack_number,
+           u.length,
+           i.type, i.code
+        FROM ip_packets p
+        LEFT JOIN tcp_data t ON p.id = t.packet_id
+        LEFT JOIN udp_data u ON p.id = u.packet_id
+        LEFT JOIN icmp_data i ON p.id = i.packet_id
+        WHERE p.capture_id = ?
         ORDER BY p.timestamp
         """
         
@@ -134,7 +132,7 @@ class PacketAnalyzer:
         except Exception as e:
             self.logger.error(f"Error al cargar paquetes: {e}")
             return pd.DataFrame()
-    
+        
     def _generate_summary(self, packets_df):
         """
         Genera un resumen del tráfico analizado.
@@ -148,24 +146,43 @@ class PacketAnalyzer:
         total_packets = len(packets_df)
         
         # Contar por protocolo
-        protocol_counts = packets_df['protocol'].value_counts().to_dict()
+        if 'protocol' in packets_df.columns:
+            protocol_counts = packets_df['protocol'].value_counts().to_dict()
+        else:
+            protocol_counts = {}
         
         # Calcular duración de la captura
-        if not packets_df.empty:
+        duration = 0
+        if not packets_df.empty and 'timestamp' in packets_df.columns:
             start_time = packets_df['timestamp'].min()
             end_time = packets_df['timestamp'].max()
-            duration = end_time - start_time
-        else:
-            duration = 0
+            
+            # Comprobar si son strings y convertirlos a datetime para poder restar
+            if isinstance(start_time, str) and isinstance(end_time, str):
+                start_datetime = pd.to_datetime(start_time)
+                end_datetime = pd.to_datetime(end_time)
+                # Calcular la diferencia en segundos
+                duration = (end_datetime - start_datetime).total_seconds()
+            else:
+                # Si son números, simplemente restar
+                duration = end_time - start_time
         
         # Top IPs origen y destino
-        top_src_ips = packets_df['src_ip'].value_counts().head(5).to_dict()
-        top_dst_ips = packets_df['dst_ip'].value_counts().head(5).to_dict()
+        top_src_ips = {}
+        top_dst_ips = {}
+        if 'src_ip' in packets_df.columns:
+            top_src_ips = packets_df['src_ip'].value_counts().head(5).to_dict()
+        if 'dst_ip' in packets_df.columns:
+            top_dst_ips = packets_df['dst_ip'].value_counts().head(5).to_dict()
         
         # Puertos más usados (para TCP/UDP)
-        tcp_udp_df = packets_df[packets_df['protocol'].isin(['TCP', 'UDP'])]
-        top_src_ports = tcp_udp_df['src_port'].value_counts().head(5).to_dict()
-        top_dst_ports = tcp_udp_df['dst_port'].value_counts().head(5).to_dict()
+        top_src_ports = {}
+        top_dst_ports = {}
+        if 'src_port' in packets_df.columns and 'dst_port' in packets_df.columns:
+            tcp_udp_df = packets_df[packets_df['protocol'].isin([6, 17])]  # TCP=6, UDP=17
+            if not tcp_udp_df.empty:
+                top_src_ports = tcp_udp_df['src_port'].value_counts().head(5).to_dict()
+                top_dst_ports = tcp_udp_df['dst_port'].value_counts().head(5).to_dict()
         
         return {
             "total_packets": total_packets,
@@ -197,13 +214,13 @@ class PacketAnalyzer:
             # Construir la consulta en función de los parámetros
             base_query = """
             SELECT p.*, 
-                   tcp.flags, tcp.window_size, tcp.seq_number, tcp.ack_number,
-                   udp.length,
-                   icmp.type, icmp.code
-            FROM packets p
-            LEFT JOIN tcp_packets tcp ON p.id = tcp.packet_id
-            LEFT JOIN udp_packets udp ON p.id = udp.packet_id
-            LEFT JOIN icmp_packets icmp ON p.id = icmp.packet_id
+                   t.flags, t.window_size, t.seq_num as seq_number, t.ack_num as ack_number,
+                   u.length,
+                   i.type, i.code
+            FROM ip_packets p
+            LEFT JOIN tcp_data t ON p.id = t.packet_id
+            LEFT JOIN udp_data u ON p.id = u.packet_id
+            LEFT JOIN icmp_data i ON p.id = i.packet_id
             WHERE 1=1
             """
             
@@ -219,9 +236,19 @@ class PacketAnalyzer:
                 params.append(end_time)
             
             if protocols:
-                placeholders = ", ".join(["?" for _ in protocols])
-                base_query += f" AND p.protocol IN ({placeholders})"
-                params.extend(protocols)
+                proto_numbers = []
+                for proto in protocols:
+                    if proto.lower() == 'tcp':
+                        proto_numbers.append(6)
+                    elif proto.lower() == 'udp':
+                        proto_numbers.append(17)
+                    elif proto.lower() == 'icmp':
+                        proto_numbers.append(1)
+                
+                if proto_numbers:
+                    placeholders = ", ".join(["?" for _ in proto_numbers])
+                    base_query += f" AND p.protocol IN ({placeholders})"
+                    params.extend(proto_numbers)
             
             if ip_addresses:
                 ip_placeholders = ", ".join(["?" for _ in ip_addresses])
@@ -266,13 +293,13 @@ class PacketAnalyzer:
             
             base_query = """
             SELECT p.*, 
-                   tcp.flags, tcp.window_size, tcp.seq_number, tcp.ack_number,
-                   udp.length,
-                   icmp.type, icmp.code
-            FROM packets p
-            LEFT JOIN tcp_packets tcp ON p.id = tcp.packet_id
-            LEFT JOIN udp_packets udp ON p.id = udp.packet_id
-            LEFT JOIN icmp_packets icmp ON p.id = icmp.packet_id
+                   t.flags, t.window_size, t.seq_num as seq_number, t.ack_num as ack_number,
+                   u.length,
+                   i.type, i.code
+            FROM ip_packets p
+            LEFT JOIN tcp_data t ON p.id = t.packet_id
+            LEFT JOIN udp_data u ON p.id = u.packet_id
+            LEFT JOIN icmp_data i ON p.id = i.packet_id
             WHERE 1=1
             """
             
@@ -321,13 +348,22 @@ class PacketAnalyzer:
             
             base_query = """
             SELECT src_ip, dst_ip, SUM(length) as total_bytes, COUNT(*) as packet_count
-            FROM packets p
+            FROM ip_packets p
             WHERE 1=1
             """
             
             if protocol:
-                conditions.append("protocol = ?")
-                params.append(protocol)
+                proto_num = None
+                if protocol.lower() == 'tcp':
+                    proto_num = 6
+                elif protocol.lower() == 'udp':
+                    proto_num = 17
+                elif protocol.lower() == 'icmp':
+                    proto_num = 1
+                
+                if proto_num:
+                    conditions.append("protocol = ?")
+                    params.append(proto_num)
             
             if timeframe:
                 start_time, end_time = timeframe
@@ -410,10 +446,10 @@ class PacketAnalyzer:
             params = []
             
             base_query = """
-            SELECT p.src_ip, p.dst_ip, p.dst_port, p.timestamp, tcp.flags
-            FROM packets p
-            LEFT JOIN tcp_packets tcp ON p.id = tcp.packet_id
-            WHERE p.protocol = 'TCP'
+            SELECT p.src_ip, p.dst_ip, t.dst_port, p.timestamp, t.flags
+            FROM ip_packets p
+            JOIN tcp_data t ON p.id = t.packet_id
+            WHERE p.protocol = 6
             """
             
             if timeframe:

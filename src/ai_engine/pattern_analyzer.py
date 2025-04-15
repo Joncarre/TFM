@@ -72,7 +72,11 @@ class PatternAnalyzer:
             return {}
             
         # Convertir timestamp a datetime para análisis temporal
-        df['datetime'] = pd.to_datetime(df['timestamp'], unit='s')
+        # Verificar el tipo de datos de timestamp
+        if df['timestamp'].dtype == 'object':  # Es un string
+            df['datetime'] = pd.to_datetime(df['timestamp'])
+        else:  # Es un número (Unix timestamp)
+            df['datetime'] = pd.to_datetime(df['timestamp'], unit='s')
         
         # Extraer componentes de tiempo
         df['hour'] = df['datetime'].dt.hour

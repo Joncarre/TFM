@@ -1,7 +1,234 @@
 {
   "all_sessions": {
     "1": {
-      "error": "No hay paquetes en esta sesión"
+      "session_info": {
+        "id": 1,
+        "capture_file": "C:\\Users\\Jona_\\Documents\\GitHub\\TFM\\captures\\capture_20250415_120812.pcap",
+        "start_time": "2025-04-15 15:49:43.337774",
+        "end_time": "2025-04-15 15:49:44.317820",
+        "packet_count": 59739,
+        "description": "Procesado de capture_20250415_120812.pcap"
+      },
+      "summary": {
+        "total_packets": 59739,
+        "protocol_distribution": {
+          "17": 30211,
+          "6": 29479,
+          "0": 49
+        },
+        "duration_seconds": 198.69352,
+        "top_source_ips": {
+          "2a00:1450:4003:808::2003": 13777,
+          "192.168.1.130": 12737,
+          "2a0c:5a86:4802:4300:9014:8e91:f5c1:569a": 10276,
+          "2a00:1450:4003:80c::2001": 4301,
+          "192.168.1.128": 4000
+        },
+        "top_destination_ips": {
+          "2a0c:5a86:4802:4300:9014:8e91:f5c1:569a": 22984,
+          "192.168.1.130": 13738,
+          "2a00:1450:4003:808::2003": 7118,
+          "192.168.1.1": 4016,
+          "192.168.1.129": 4008
+        },
+        "top_source_ports": {},
+        "top_destination_ports": {}
+      },
+      "anomalies": [],
+      "patterns": {
+        "time_patterns": {
+          "peak_hour": {
+            "hour": 12,
+            "traffic": 59739
+          },
+          "min_hour": {
+            "hour": 12,
+            "traffic": 59739
+          },
+          "peak_day": {
+            "day": "Martes",
+            "traffic": 59739
+          },
+          "min_day": {
+            "day": "Martes",
+            "traffic": 59739
+          },
+          "hourly_distribution": {
+            "12": 59739
+          },
+          "daily_distribution": {
+            "Martes": 59739
+          },
+          "periodicity": {
+            "detected": false,
+            "autocorrelation": 0.0
+          }
+        },
+        "communication_patterns": {
+          "top_communication_pairs": {
+            "2a00:1450:4003:808::2003 → 2a0c:5a86:4802:4300:9014:8e91:f5c1:569a": 13777,
+            "2a0c:5a86:4802:4300:9014:8e91:f5c1:569a → 2a00:1450:4003:808::2003": 7118,
+            "2a00:1450:4003:80c::2001 → 2a0c:5a86:4802:4300:9014:8e91:f5c1:569a": 4301,
+            "192.168.1.130 → 192.168.1.1": 4016,
+            "192.168.1.130 → 192.168.1.129": 4008,
+            "192.168.1.128 → 192.168.1.130": 4000,
+            "192.168.1.130 → 192.168.1.128": 4000,
+            "192.168.1.129 → 192.168.1.130": 3994,
+            "192.168.1.1 → 192.168.1.130": 3987,
+            "2001:4860:4802:38::87 → 2a0c:5a86:4802:4300:9014:8e91:f5c1:569a": 1096
+          },
+          "potential_servers": {},
+          "potential_clients": {}
+        },
+        "protocol_patterns": {
+          "distribution": {
+            "17": 30211,
+            "6": 29479,
+            "0": 49
+          },
+          "tcp": {},
+          "udp": {},
+          "icmp": {}
+        }
+      },
+      "risk_score": {
+        "global_score": 0.0,
+        "components": {},
+        "risk_level": "Sin riesgo"
+      },
+      "visualizations": {
+        "protocol_distribution": {
+          "chart_type": "pie",
+          "title": "Distribución de Protocolos",
+          "data": [
+            {
+              "protocol": 17,
+              "count": 30211,
+              "percentage": 50.57165335877735
+            },
+            {
+              "protocol": 6,
+              "count": 29479,
+              "percentage": 49.346323172466896
+            },
+            {
+              "protocol": 0,
+              "count": 49,
+              "percentage": 0.0820234687557542
+            }
+          ],
+          "total_packets": 59739
+        },
+        "port_activity": {
+          "error": "No hay datos de puertos disponibles"
+        },
+        "ip_communications": {
+          "chart_type": "network",
+          "title": "Principales Comunicaciones entre IPs",
+          "nodes": [
+            {
+              "id": "2a0c:5a86:4802:4300:9014:8e91:f5c1:569a",
+              "packets_sent": 10276,
+              "packets_received": 22984,
+              "total_activity": 33260
+            },
+            {
+              "id": "192.168.1.130",
+              "packets_sent": 12737,
+              "packets_received": 13738,
+              "total_activity": 26475
+            },
+            {
+              "id": "2a00:1450:4003:808::2003",
+              "packets_sent": 13777,
+              "packets_received": 7118,
+              "total_activity": 20895
+            },
+            {
+              "id": "192.168.1.1",
+              "packets_sent": 3987,
+              "packets_received": 4016,
+              "total_activity": 8003
+            },
+            {
+              "id": "192.168.1.129",
+              "packets_sent": 3995,
+              "packets_received": 4008,
+              "total_activity": 8003
+            },
+            {
+              "id": "192.168.1.128",
+              "packets_sent": 4000,
+              "packets_received": 4000,
+              "total_activity": 8000
+            },
+            {
+              "id": "2a00:1450:4003:80c::2001",
+              "packets_sent": 4301,
+              "packets_received": 713,
+              "total_activity": 5014
+            },
+            {
+              "id": "2001:4860:4802:38::87",
+              "packets_sent": 1096,
+              "packets_received": 247,
+              "total_activity": 1343
+            }
+          ],
+          "links": [
+            {
+              "source": "2a00:1450:4003:808::2003",
+              "target": "2a0c:5a86:4802:4300:9014:8e91:f5c1:569a",
+              "value": 13777
+            },
+            {
+              "source": "2a0c:5a86:4802:4300:9014:8e91:f5c1:569a",
+              "target": "2a00:1450:4003:808::2003",
+              "value": 7118
+            },
+            {
+              "source": "2a00:1450:4003:80c::2001",
+              "target": "2a0c:5a86:4802:4300:9014:8e91:f5c1:569a",
+              "value": 4301
+            },
+            {
+              "source": "192.168.1.130",
+              "target": "192.168.1.1",
+              "value": 4016
+            },
+            {
+              "source": "192.168.1.130",
+              "target": "192.168.1.129",
+              "value": 4008
+            },
+            {
+              "source": "192.168.1.128",
+              "target": "192.168.1.130",
+              "value": 4000
+            },
+            {
+              "source": "192.168.1.130",
+              "target": "192.168.1.128",
+              "value": 4000
+            },
+            {
+              "source": "192.168.1.129",
+              "target": "192.168.1.130",
+              "value": 3994
+            },
+            {
+              "source": "192.168.1.1",
+              "target": "192.168.1.130",
+              "value": 3987
+            },
+            {
+              "source": "2001:4860:4802:38::87",
+              "target": "2a0c:5a86:4802:4300:9014:8e91:f5c1:569a",
+              "value": 1096
+            }
+          ]
+        }
+      }
     }
   }
 }

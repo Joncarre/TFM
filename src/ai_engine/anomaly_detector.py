@@ -226,7 +226,10 @@ class AnomalyDetector:
             return anomalies
             
         # Agrupar por ventanas de tiempo (por ejemplo, cada minuto)
-        df['minute'] = pd.to_datetime(df['timestamp'], unit='s').dt.floor('min')
+        if df['timestamp'].dtype == 'object':  # Es un string
+            df['minute'] = pd.to_datetime(df['timestamp']).dt.floor('min')
+        else:  # Es un número (Unix timestamp)
+            df['minute'] = pd.to_datetime(df['timestamp'], unit='s').dt.floor('min')
         traffic_by_minute = df.groupby('minute').size()
         
         if len(traffic_by_minute) < 3:  # Necesitamos al menos 3 minutos para análisis
