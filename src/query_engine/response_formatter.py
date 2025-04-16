@@ -2,6 +2,8 @@
 import json
 import logging
 from typing import Dict, List, Any, Optional
+# Añadir al inicio de response_formatter.py:
+from src.query_engine.response_templates import ResponseTemplates
 
 class ResponseFormatter:
     """
@@ -35,6 +37,10 @@ class ResponseFormatter:
         
         # Añadir metadatos comunes
         formatted_response["time_period"] = results.get("time_period", "")
+        
+        # Obtener plantilla para ese tipo de respuesta
+        template_generator = ResponseTemplates.get_template(result_type)
+        formatted_response["response_template"] = template_generator(results)
         
         return formatted_response
     
