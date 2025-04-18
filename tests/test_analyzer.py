@@ -49,6 +49,20 @@ def print_analysis_results(results, title):
 def main():
     args = parse_arguments()
     
+    # Si la ruta es relativa, intentar resolverla respecto a diferentes ubicaciones
+    if args.db_path and not os.path.isabs(args.db_path):
+        potential_paths = [
+            args.db_path,  # Directamente como se proporcionó
+            os.path.join(os.getcwd(), args.db_path),  # Relativo al directorio de trabajo actual
+            os.path.join(os.path.dirname(__file__), '..', args.db_path),  # Relativo a la raíz del proyecto
+            os.path.join(os.path.dirname(__file__), '..', 'databases', os.path.basename(args.db_path))  # En el directorio databases
+        ]
+        
+        for path in potential_paths:
+            if os.path.exists(path):
+                args.db_path = path
+                break
+    
     # Verificar que la base de datos existe
     if not os.path.exists(args.db_path):
         print(f"Error: La base de datos {args.db_path} no existe.")

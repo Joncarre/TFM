@@ -61,11 +61,13 @@ def main():
             return
     
     # Obtener API key desde variables de entorno
-    api_key = os.getenv("ANTHROPIC_API_KEY")
+    api_key = os.getenv("ANTHROPIC_API_KEY") or os.getenv("API_KEY_OPENAI")
     if not api_key:
-        print("Error: API key de Claude no encontrada.")
-        print("Por favor, establezca la variable de entorno ANTHROPIC_API_KEY.")
-        return
+        print("No se encontró la API key en las variables de entorno.")
+        api_key = input("Por favor, ingrese su API key de Claude/Anthropic: ")
+        if not api_key:
+            print("Error: API key no proporcionada.")
+            return
     
     # Inicializar el motor de consultas
     print(f"Inicializando motor de consultas con base de datos: {args.db}")

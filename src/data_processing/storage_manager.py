@@ -28,16 +28,36 @@ class StorageManager:
         Args:
             db_file: Ruta al archivo de base de datos SQLite
             retention_days: Número de días que se deben conservar los datos
-        """
-        # Crear directorio databases si no existe
-        database_dir = "databases"
-        os.makedirs(database_dir, exist_ok=True)
-        
-        # Si db_file no incluye un separador de ruta, añadir databases/
-        if os.path.sep not in db_file:
-            self.db_file = os.path.join(database_dir, db_file)
-        else:
+        """        # Asegurar que la ruta de la base de datos sea absoluta y exista
+        if os.path.isabs(db_file):
+            # Si es ruta absoluta, usarla directamente
             self.db_file = db_file
+        else:
+            # Si es ruta relativa, intentar resolver respecto a diferentes ubicaciones
+            potential_paths = [
+                db_file,  # Como se proporcionó
+                os.path.join(os.getcwd(), db_file),  # Relativo al directorio de trabajo actual
+                os.path.join(os.path.dirname(__file__), '..', '..', db_file),  # Relativo a la raíz del proyecto
+                # Si solo contiene el nombre del archivo, buscarlo en databases/
+                os.path.join(os.getcwd(), "databases", os.path.basename(db_file))
+            ]
+            
+            # Intentar encontrar el archivo en alguna de las rutas potenciales
+            found = False
+            for path in potential_paths:
+                if os.path.exists(path):
+                    self.db_file = path
+                    found = True
+                    break
+            
+            # Si no se encontró, usar la ruta original (puede fallar pero mostrará un error más claro)
+            if not found:
+                self.db_file = db_file
+                
+        # Crear el directorio contenedor si no existe
+        db_dir = os.path.dirname(self.db_file)
+        if db_dir:
+            os.makedirs(db_dir, exist_ok=True)
             
         self.retention_days = retention_days
         self._init_database()

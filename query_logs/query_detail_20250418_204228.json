@@ -1,0 +1,8 @@
+{
+  "original_query": "Dame un resumen del tráfico de red",
+  "processed_query": {
+    "original_query": "Dame un resumen del tráfico de red",
+    "normalized_query": "dame un resumen del tráfico de red",
+    "intent": "resumen_trafico",
+    "parameters": {
+      "end_time": 

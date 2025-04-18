@@ -4,6 +4,8 @@ import os
 import sqlite3
 import json
 import datetime
+import sys
+import argparse
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -68,25 +70,59 @@ def get_db_statistics(db_file):
     conn.close()
     return stats
 
-def query_advanced_db_info():
-    """Realiza consultas avanzadas a la base de datos y muestra los resultados de manera estructurada."""
-    # Verificar si la base de datos existe
-    db_files = [f for f in os.listdir('.') if f.endswith('.db')]
+def query_advanced_db_info(specific_db_file=None):
+    """
+    Realiza consultas avanzadas a la base de datos y muestra los resultados de manera estructurada.
     
-    if not db_files:
-        print(f"{Fore.RED}No se encontraron archivos de base de datos en el directorio actual.{Style.RESET_ALL}")
-        return
-    
-    # Si hay múltiples bases de datos, usar la que tenga un tamaño no cero
+    Args:
+        specific_db_file (str, optional): Ruta específica a la base de datos a utilizar.
+                                         Si se proporciona, se usará esta base de datos en lugar
+                                         de buscar automáticamente una.
+    """
     db_file = None
-    for f in db_files:
-        if os.path.getsize(f) > 0:
-            db_file = f
-            break
     
-    if not db_file:
-        print(f"{Fore.RED}No se encontraron bases de datos válidas.{Style.RESET_ALL}")
-        return
+    # Si se especificó un archivo específico, usarlo directamente
+    if specific_db_file:
+        if os.path.exists(specific_db_file):
+            db_file = specific_db_file
+        else:
+            # Si no existe como ruta absoluta, intentar en el directorio databases
+            database_dir = "databases"
+            if not os.path.exists(database_dir):
+                database_dir = os.path.join("..", "databases")
+            
+            potential_path = os.path.join(database_dir, specific_db_file)
+            if os.path.exists(potential_path):
+                db_file = potential_path
+            else:
+                print(f"{Fore.RED}No se encontró la base de datos especificada: {specific_db_file}{Style.RESET_ALL}")
+                return
+    else:
+        # Comportamiento original: buscar automáticamente
+        database_dir = "databases"
+        if not os.path.exists(database_dir):
+            database_dir = os.path.join("..", "databases")  # Intenta un nivel arriba
+            if not os.path.exists(database_dir):
+                print(f"{Fore.RED}No se encontró el directorio 'databases'.{Style.RESET_ALL}")
+                return
+        
+        # Buscar archivos de base de datos en el directorio databases
+        db_files = [f for f in os.listdir(database_dir) if f.endswith('.db')]
+        
+        if not db_files:
+            print(f"{Fore.RED}No se encontraron archivos de base de datos en el directorio '{database_dir}'.{Style.RESET_ALL}")
+            return
+        
+        # Si hay múltiples bases de datos, usar la que tenga un tamaño no cero
+        for f in db_files:
+            file_path = os.path.join(database_dir, f)
+            if os.path.getsize(file_path) > 0:
+                db_file = file_path
+                break
+        
+        if not db_file:
+            print(f"{Fore.RED}No se encontraron bases de datos válidas en '{database_dir}'.{Style.RESET_ALL}")
+            return
     
     print(f"{Fore.GREEN}Usando base de datos: {db_file} ({os.path.getsize(db_file)/1024:.2f} KB){Style.RESET_ALL}")
     
@@ -744,5 +780,12 @@ def identify_ip_type(ip):
     # Público por defecto
     return "IPv4 Pública"
 
+def parse_arguments():
+    """Procesa los argumentos de línea de comandos"""
+    parser = argparse.ArgumentParser(description='Herramienta de análisis avanzado de tráfico de red')
+    parser.add_argument('--db', '-d', type=str, help='Nombre o ruta del archivo de base de datos a analizar')
+    return parser.parse_args()
+
 if __name__ == "__main__":
-    query_advanced_db_info()
+    args = parse_arguments()
+    query_advanced_db_info(args.db)

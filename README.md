@@ -103,6 +103,26 @@ result = processor.process_query("¿Ha habido algún intento de ataque de fuerza
 print(result)
 ```
 
+
+## Comandos
+listar las capturas pcap
+python tests/test_capture.py --list-captures
+
+listar las interfaces
+python tests/test_capture.py --list-interfaces
+
+capturar paquetes
+python tests/test_capture.py --capture --interface "nombre_de_tu_interfaz" --duration 100
+
+generar la base de datos
+python tests/test_capture.py --open captures/nombre_de_tu_captura.pcap
+
+generar json con información
+python tests\test_analyzer.py --db_path databases\nombre_de_tu_bbdd.db --analyze_all --output analysis_results\
+
+visualizar información
+python tests/visualize_analysis.py analysis_results/nombre_de_tu_json.json
+
 ## 📊 Casos de uso
 
 - **Monitoreo de seguridad para pequeñas empresas**: Permite a administradores IT con conocimientos limitados detectar amenazas.
