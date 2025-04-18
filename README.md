@@ -77,31 +77,8 @@
 
 ## 🔧 Uso
 
-### Captura de paquetes
-```python
-from src.packet_capture.capture_manager import CaptureManager
+Falta actualizar.
 
-# Iniciar captura en interfaz predeterminada
-manager = CaptureManager()
-manager.start_capture()
-
-# Detener después de 60 segundos
-import time
-time.sleep(60)
-manager.stop_capture()
-
-# Guardar captura
-manager.save_capture("mi_captura.pcap")
-```
-
-### Consultas en lenguaje natural
-```python
-from src.ai_engine.query_processor import QueryProcessor
-
-processor = QueryProcessor()
-result = processor.process_query("¿Ha habido algún intento de ataque de fuerza bruta?")
-print(result)
-```
 
 ## 📊 Casos de uso
 
