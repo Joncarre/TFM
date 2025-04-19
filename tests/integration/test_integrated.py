@@ -5,8 +5,8 @@ import datetime
 import requests
 from dotenv import load_dotenv
 
-# Añadir directorio raíz al path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Añadir el directorio raíz del proyecto al path para poder importar desde src
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from src.ai_engine.packet_analyzer import PacketAnalyzer
 from src.data_processing.storage_manager import StorageManager
@@ -76,8 +76,14 @@ def main():
     if not api_key:
         api_key = input("Ingrese su API key de Claude: ")
     
+    # Comprobar argumentos
+    interactive_mode = "--interactive" in sys.argv
+    if interactive_mode:
+        # Remover --interactive de los argumentos para procesamiento
+        sys.argv.remove("--interactive")
+    
     db_path = sys.argv[1] if len(sys.argv) > 1 else "databases/database_20250418_141938.db"
-    query = sys.argv[2] if len(sys.argv) > 2 else "Dame un resumen del tráfico de red"
+    query = sys.argv[2] if len(sys.argv) > 2 else "Dame un resumen inicial del tráfico de red"
     
     print(f"Analizando base de datos: {db_path}")
     
@@ -110,13 +116,39 @@ def main():
         "top_talkers": top_talkers
     }
     
-    # Consultar a Claude
-    print(f"Consultando a Claude: {query}")
-    response = query_claude(query, context, api_key)
-    
-    print("\nRESPUESTA:\n" + "="*80)
-    print(response)
-    print("="*80)
+    # Modo interactivo
+    if interactive_mode:
+        print("\nModo interactivo activado. Escribe 'salir' para terminar.")
+        
+        # Primera consulta (la proporcionada por argumento o por defecto)
+        print(f"Consultando a Claude: {query}")
+        response = query_claude(query, context, api_key)
+        print("\nRESPUESTA:\n" + "="*80)
+        print(response)
+        print("="*80)
+        
+        # Bucle interactivo
+        while True:
+            user_query = input("\nConsulta> ")
+            if user_query.lower() in ['salir', 'exit', 'quit']:
+                print("Saliendo del modo interactivo...")
+                break
+                
+            if not user_query.strip():
+                continue
+                
+            print(f"Consultando a Claude: {user_query}")
+            response = query_claude(user_query, context, api_key)
+            print("\nRESPUESTA:\n" + "="*80)
+            print(response)
+            print("="*80)
+    else:
+        # Modo normal (una sola consulta)
+        print(f"Consultando a Claude: {query}")
+        response = query_claude(query, context, api_key)
+        print("\nRESPUESTA:\n" + "="*80)
+        print(response)
+        print("="*80)
 
 if __name__ == "__main__":
     main()

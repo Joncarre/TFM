@@ -77,8 +77,31 @@
 
 ## 🔧 Uso
 
-Falta actualizar.
+### Captura de paquetes
+```python
+from src.packet_capture.capture_manager import CaptureManager
 
+# Iniciar captura en interfaz predeterminada
+manager = CaptureManager()
+manager.start_capture()
+
+# Detener después de 60 segundos
+import time
+time.sleep(60)
+manager.stop_capture()
+
+# Guardar captura
+manager.save_capture("mi_captura.pcap")
+```
+
+### Consultas en lenguaje natural
+```python
+from src.ai_engine.query_processor import QueryProcessor
+
+processor = QueryProcessor()
+result = processor.process_query("¿Ha habido algún intento de ataque de fuerza bruta?")
+print(result)
+```
 
 
 ## Comandos
@@ -94,11 +117,18 @@ python tests/test_capture.py --capture --interface "nombre_de_tu_interfaz" --dur
 generar la base de datos
 python tests/test_capture.py --open captures/nombre_de_tu_captura.pcap
 
+ver datos en detalle
+python tests/query_test.py --db databases/database_20250418_141938.db 
+
 generar json con información
 python tests\test_analyzer.py --db_path databases\nombre_de_tu_bbdd.db --analyze_all --output analysis_results\
 
 visualizar información
 python tests/visualize_analysis.py analysis_results/nombre_de_tu_json.json
+
+ver datos en lenguaje natural
+python tests/test_integrated.py databases/database_20250418_141938.db --interactive 
+python tests/test_integrated.py databases/database_20250418_141938.db "Dame un resumen del tráfico de red"
 
 ## 📊 Casos de uso
 
